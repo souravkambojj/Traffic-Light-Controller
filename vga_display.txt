@@ -1,0 +1,114 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+entity vga_display1 is
+ Port ( nr,ny,ng, er,ey,eg, sr,sy,sg, wr,wy,wg, clk,rst : in  STD_LOGIC;
+           r,g,b,vs,hs : out  STD_LOGIC);
+end vga_display1;
+architecture Behavioral of vga_display1 is
+signal crtclk : std_logic;
+signal vc,hc : integer range 0 to 850:= 0;
+signal c : std_logic := '0';
+begin
+----------clk divider
+process(clk,rst)
+begin
+if clk'event and clk = '1' then  ----crtclk=25MHZ
+c <= not c;
+end if;
+end process;
+crtclk <= c;
+-------------------------
+process (crtclk,rst,nr,ny,ng, er,ey,eg, sr,sy,sg, wr,wy,wg,vc,hc)
+begin
+if rst = '1' then
+hs <= '0';vs <= '0';r <= '0';g<= '0';b <='0';
+elsif crtclk'event and crtclk = '1' then
+if vc = 528 then
+vc <= 0;
+elsif hc = 808 then
+hc <= 0;
+vc <= vc + 1;
+else 
+hc <= hc + 1;
+end if;
+
+if hc > 664 and hc < 760 then
+hs <= '0';
+else
+hs <= '1';
+end if;
+
+if vc > 482 and vc < 484 then
+vs <= '0';
+else
+vs<= '1';
+end if;
+----------------------------------------------------------
+if (ng='1' and hc > 270  and hc < 370 and vc > 0 and vc < 60 )then
+
+r <= '0';g<= '1';b <='0';
+
+
+elsif (ny='1' and hc > 270  and hc < 370 and vc > 60 and vc < 120 )then
+
+r <= '1';g<= '1';b <='0';
+
+
+elsif (nr='1' and hc > 270  and hc < 370 and vc > 120 and vc < 180)then
+
+r <= '1';g<= '0';b <='0';
+
+
+elsif (sr='1' and hc >270 and hc <370 and vc > 300 and vc < 360)then
+
+r <= '1';g<= '0';b <='0';
+
+
+elsif (sy='1' and hc >270 and hc <370 and vc > 360 and vc < 420)then
+
+r <= '1';g<= '1';b <='0';
+
+
+elsif (sg='1' and hc >270 and hc <370 and vc > 420 and vc < 480)then
+
+r <= '0';g<= '1';b <='0';
+
+
+elsif (er='1' and hc > 370 and hc < 460 and vc > 190 and vc < 290)then
+
+r <= '1';g<= '0';b <='0';
+
+
+elsif (ey='1' and hc > 460  and hc < 550 and vc > 190 and vc < 290 )then
+
+r <= '1';g<= '1';b <='0';
+
+
+elsif (eg='1' and hc > 550  and hc < 640 and vc > 190 and vc < 290 )then
+
+r <= '0';g<= '1';b <='0';
+
+
+elsif (wg='1' and hc > 0 and hc < 90 and vc > 190 and vc < 290)then
+
+r <= '0';g<= '1';b <='0';
+
+
+
+elsif (wy='1' and hc > 90 and hc < 180 and vc > 190 and vc < 290)then
+
+r <= '1';g<= '1';b <='0';
+
+
+elsif (wr='1' and hc > 180 and hc < 270 and vc > 190 and vc < 290)then
+
+r <= '1';g<= '0';b <='0';
+
+
+else
+
+r<= '0';g<= '0';b <='0';
+end if;
+end if;
+end process;
+end Behavioral;

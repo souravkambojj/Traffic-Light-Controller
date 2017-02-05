@@ -1,0 +1,142 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+entity final_traffic_light is
+  Port ( 
+	        clk,rst : in  STD_LOGIC;
+           r,g,b,vs,hs: out  STD_LOGIC);
+end final_traffic_light;
+
+architecture Behavioral of final_traffic_light is
+
+type state is (st1,st2,st3,st4,st5,st6,st7,st8,st9);
+signal count:integer range 0 to 20;
+signal pstate,nstate:state;
+CONSTANT tr : INTEGER := 10;
+CONSTANT ty : INTEGER := 5;
+CONSTANT tg : INTEGER := 10;
+SIGNAL t: INTEGER RANGE 0 TO 20;
+signal clkd,nr,ny,ng, er,ey,eg, sr,sy,sg, wr,wy,wg: std_logic;
+signal m : integer range 0 to 25000000; 
+   component vga_display1 is 
+     Port ( nr,ny,ng, er,ey,eg, sr,sy,sg, wr,wy,wg, clk,rst : in  STD_LOGIC;
+           r,g,b,vs,hs : out  STD_LOGIC);
+	 end component;	
+
+ begin
+ ----------------------------------------
+ process(clk,rst)
+ begin
+ if(rst='1') then
+ m<=0;
+ clkd<='1';
+ elsif(clk'event and clk='1') then     ----------CLK DIVIDER 
+if(m=25000000) then                    ----------CLK=50MHZ
+clkd<=not clkd;                        ----------CLKD=1HZ
+m<=0;
+else 
+m<=m+1;
+end if;
+end if;
+end process; 
+----------------------------------------------
+ process(clkd,rst)    
+begin  
+if(rst='1')then
+count<=0;
+pstate<=st1;
+
+elsif(clkd'event and clkd='1')then
+count<= count +1;
+if (count=t) then 
+pstate<=nstate;
+count<=0;
+end if;
+end if;
+end process;
+
+process (pstate,clkd)
+
+begin
+if(clkd'event and clkd='1')then
+case pstate is
+
+
+when st1 =>
+nr<='1'; er<='1';sr<='1';wr<='1';
+ny<='0'; ey<='0';sy<='0';wy<='0';
+ng<='0'; eg<='0';sg<='0';wg<='0';
+t<=tr;nstate<=st2;
+
+
+
+when st2 =>
+nr<='0'; er<='1';sr<='1';wr<='1';
+ny<='0'; ey<='0';sy<='0';wy<='0';
+ng<='1'; eg<='0';sg<='0';wg<='0';
+t<=tg;nstate<=st3;
+
+
+
+when st3 =>
+nr<='0'; er<='0';sr<='1';wr<='1';
+ny<='1'; ey<='1';sy<='0';wy<='0';
+ng<='0'; eg<='0';sg<='0';wg<='0';
+t<=ty;nstate<=st4;
+
+
+
+when st4 =>
+nr<='1'; er<='0';sr<='1';wr<='1';
+ny<='0'; ey<='0';sy<='0';wy<='0';
+ng<='0'; eg<='1';sg<='0';wg<='0';
+t<=tg;nstate<=st5;
+
+
+
+when st5 =>
+nr<='1'; er<='0';sr<='0';wr<='1';
+ny<='0'; ey<='1';sy<='1';wy<='0';
+ng<='0'; eg<='0';sg<='0';wg<='0';
+
+t<=ty;nstate<=st6;
+
+
+
+when st6=>
+nr<='1'; er<='1';sr<='0';wr<='1';
+ny<='0'; ey<='0';sy<='0';wy<='0';
+ng<='0'; eg<='0';sg<='1';wg<='0';
+t<=tg;nstate<=st7;
+
+
+
+when st7 =>
+nr<='1'; er<='1';sr<='0';wr<='0';
+ny<='0'; ey<='0';sy<='1';wy<='1';
+ng<='0'; eg<='0';sg<='0';wg<='0';
+t<=ty;nstate<=st8;
+
+when st8 =>
+nr<='1'; er<='1';sr<='1';wr<='0';
+ny<='0'; ey<='0';sy<='0';wy<='0';
+ng<='0'; eg<='0';sg<='0';wg<='1';
+t<=tg;nstate<=st9;
+
+
+
+when st9 =>
+nr<='0'; er<='1';sr<='1';wr<='0';
+ny<='1'; ey<='0';sy<='0';wy<='1';
+ng<='0'; eg<='0';sg<='0';wg<='0';
+t<=ty;nstate<=st2;
+
+
+
+when others =>
+nr<='1'; er<='1';sr<='1';wr<='1';
+end case;
+end if;
+end process;
+
+dout:vga_display1 port map( nr,ny,ng, er,ey,eg, sr,sy,sg, wr,wy,wg ,clk,rst,r,g,b,vs,hs);
+end Behavioral;
